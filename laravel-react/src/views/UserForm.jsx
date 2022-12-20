@@ -1,11 +1,14 @@
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axiosClient from "../axios-client.js";
+import {useStateContext} from "../contexts/ContextProvider.jsx";
 
 export default function UserForm() {
   const {id} = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
+  const {setNotification} = useStateContext();
   const [user, setUser] = useState({
     id: null,
     name: '',
@@ -30,6 +33,29 @@ export default function UserForm() {
 
   const onSubmit = (ev) => {
     ev.preventDefault();
+    let method;
+    let url;
+    let notificationMessage;
+    if(user.id) {
+      method = 'put';
+      url = `/users/${user.id}`;
+      notificationMessage = "User was successfully updated";
+    } else {
+      method = 'post';
+      url = `/users`;
+      notificationMessage = "User was successfully created";
+    }
+    axiosClient[method](url, user)
+      .then(() => {
+        setNotification(notificationMessage);
+        navigate('/users');
+      })
+      .catch(err => {
+        const response = err.response;
+        if(response && response.status === 422) {
+          setErrors(response.data.errors)
+        }
+      });
   };
 
   return (
@@ -42,11 +68,11 @@ export default function UserForm() {
           )
         }
         { errors && <div className="alert">
-          { Object.keys(errors).map((key) => (
-            <p key={key}>{errors[key][0]}</p>
-          ))
-          }
-        </div>
+            { Object.keys(errors).map((key) => (
+              <p key={key}>{errors[key][0]}</p>
+            ))
+            }
+          </div>
         }
         { !loading && <form onSubmit={onSubmit}>
             <input type="text" value={user.name} onChange={ev => setUser({...user, name: ev.target.value})} placeholder="Name"/>
