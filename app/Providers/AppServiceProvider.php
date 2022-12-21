@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Macro\RequestMacro;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Request::mixin(new RequestMacro());
+
+        Str::macro('checkLength', function ($str, $length) {
+            return static::length($str) === $length;
+        });
     }
 }

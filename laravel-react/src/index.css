@@ -59,7 +59,8 @@ input:focus {
 
 .btn-add,
 .btn-edit,
-.btn-delete{
+.btn-delete,
+.btn-paginate {
   padding: 0.5rem 0.75rem;
   font-size: 14px;
   border-radius: 4px;
@@ -69,6 +70,10 @@ input:focus {
 }
 .btn-delete {
   background-color: #b72424;
+}
+
+.btn-paginate {
+  background-color: #838383;
 }
 
 .btn-logout {
@@ -136,6 +141,17 @@ table > tbody > tr > td {
   background-color: #00a762;
   color: white;
   border-radius: 0.5rem;
+}
+
+.paginate {
+  height: 80px;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.paginate .btn {
+  margin: 2px;
 }
 
 /* Login/Signup forms*/

@@ -1,11 +1,12 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import axiosClient from "../axios-client.js";
-import {Link} from "react-router-dom";
+import {Link, Navigate} from "react-router-dom";
 import {useStateContext} from "../contexts/ContextProvider.jsx";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState([]);
   const {setNotification} = useStateContext();
 
   useEffect(() => {
@@ -23,13 +24,23 @@ export default function Users() {
       });
   };
 
-  const getUsers = () => {
+  const onNavigate = (p) => {
+    if(p) {
+      const page = p.split('=')[1];
+      getUsers(page);
+    }
+  }
+
+  const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
+
+
+  const getUsers = (page = 1) => {
     setLoading(true);
-    axiosClient.get('/users')
+    axiosClient.get('/users?page='+page)
       .then(({data}) => {
-        console.log(data);
         setLoading(false);
         setUsers(data.data);
+        setPagination(data.meta.links)
       })
       .catch(() => {
         setLoading(false);
@@ -78,6 +89,14 @@ export default function Users() {
             </tbody>
           }
         </table>
+        { pagination && <div className="paginate">
+          {
+            pagination.map((p, key) => (
+              <button className={`btn ${p.active ? 'btn-edit' : 'btn-paginate'}`} key={key} onClick={ev => onNavigate(p.url)}>{renderHTML(p.label)}</button>
+            ))
+          }
+          </div>
+        }
       </div>
     </div>
   )
